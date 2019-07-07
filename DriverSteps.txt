@@ -1,0 +1,19 @@
+make clean
+make -C /usr/src/linux-headers-4.19.50-v7+/ M=/home/pi/Desktop/LED_Driver modules
+
+sudo rmmod simple-module.ko
+sudo insmod simple-module.ko
+
+cat /proc/devices
+
+sudo rm /dev/simple-driver
+
+sudo mknod /dev/simple-driver c 235 0
+
+sudo chmod 666 /dev/simple-driver
+
+for i in {0..9}; do sleep 1; echo $i > /dev/simple-driver $i; done
+echo 0 > /dev/simple-driver
+
+sudo rmmod simple-module.ko
+make clean
