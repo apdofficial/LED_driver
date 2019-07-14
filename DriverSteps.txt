@@ -8,7 +8,7 @@ cat /proc/devices
 
 sudo rm /dev/simple-driver
 
-sudo mknod /dev/simple-driver c 235 0
+sudo mknod /dev/simple-driver c 240 0
 
 sudo chmod 666 /dev/simple-driver
 
