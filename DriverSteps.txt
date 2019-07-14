@@ -12,7 +12,7 @@ sudo chmod 666 /dev/Andrej-driver
 
 for i in {0..9}; do sleep 1; echo $i > /dev/Andrej-driver $i; cat /dev/Andrej-driver; done
 
-sudo rmmod simple-module.ko
+sudo rmmod Andrej-module.ko
 
 
 
