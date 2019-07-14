@@ -1,11 +1,12 @@
 make clean
+
 make -C /usr/src/linux-headers-4.19.50-v7+/ M=/home/pi/Desktop/LED_Driver modules
 
-sudo insmod simple-module.ko
+sudo insmod Andrej-module.ko
 
-sudo rm /dev/simple-driver
+sudo rm /dev/Andrej-driver
 
-sudo mknod /dev/simple-driver c 240 0
+sudo mknod /dev/Andrej-driver c 240 0
 
 sudo chmod 666 /dev/Andrej-driver
 

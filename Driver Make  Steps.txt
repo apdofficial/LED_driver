@@ -1,0 +1,10 @@
+make clean
+make all
+make load
+sudo mknod /dev/Andrej-driver c 240 0
+sudo chmod 666 /dev/Andrej-driver
+for i in {0..9}; do sleep 1; echo $i > /dev/Andrej-driver $i; cat /dev/Andrej-driver; done
+make unload
+
+
+for i in {0..9}; do sleep 1; echo $i > /dev/Andrej-driver $i; done

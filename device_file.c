@@ -1,3 +1,11 @@
+/*******************************************************************************
+ *                                                                             *
+ *   Program    : LED Driver                                                   *
+ *   Programmer : Andrej Pistek (450966)                                       *
+ *   Date       : 02-July-2018                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
 #include "device_file.h"
 #include <linux/fs.h>           /* file stuff */
 #include <linux/kernel.h>       /* printk() */
@@ -10,6 +18,12 @@
 #include <linux/io.h>
 #include <linux/gpio.h>
 
+/*
+ *  Function: set_coordinates
+ *  ---------------------------
+ *  Sets assigned pins of 7-segment display with provided argument using gpio.h library.
+ *  returns: void
+ */
 static inline void set_coordinates(int a, int b, int c, int d,int e, int f, int g){
     gpio_set_value(16, a);
     gpio_set_value(17, b);
@@ -20,36 +34,58 @@ static inline void set_coordinates(int a, int b, int c, int d,int e, int f, int 
     gpio_set_value(22, g);
 }
 
-/*===============================================================================================*/
+/*
+ *  Function: device_file_write
+ *  ---------------------------
+ *  Sets assigned pins of 7-segment display with provided argument taken from user_buffer.
+ *  returns: 1 or -EFAULT if getting the value from user fails
+ */
 static ssize_t device_file_write(struct file *filp, const char *user_buffer, size_t count, loff_t *pos) {
     char c;
     if (copy_from_user(&c, user_buffer, sizeof(char))) {
         return -EFAULT;
     }
-    if (c == '0') {
-        set_coordinates(0,0,0,0,0,0,1);
-    } else if (c == '1') {
-        set_coordinates(1,0,0,1,1,1,1);
-    } else if (c == '2') {
-        set_coordinates(0,0,1,0,0,1,0);
-    } else if (c == '3') {
-        set_coordinates(0,0,0,0,1,1,0);
-    } else if (c == '4') {
-        set_coordinates(1,0,0,1,1,0,0);
-    } else if (c == '5') {
-        set_coordinates(0,1,0,0,1,0,0);
-    } else if (c == '6') {
-        set_coordinates(0,1,0,0,0,0,0);
-    } else if (c == '7') {
-        set_coordinates(0,0,0,1,1,1,1);
-    } else if (c == '8') {
-        set_coordinates(0,0,0,0,0,0,0);
-    } else if (c == '9') {
-        set_coordinates(0,0,0,0,1,0,0);
+    switch (c){
+        case '0':
+            set_coordinates(0,0,0,0,0,0,1);
+            break;
+        case '1':
+            set_coordinates(1,0,0,1,1,1,1);
+            break;
+        case '2':
+            set_coordinates(0,0,1,0,0,1,0);
+            break;
+        case '3':
+            set_coordinates(0,0,0,0,1,1,0);
+            break;
+        case '4':
+            set_coordinates(1,0,0,1,1,0,0);
+            break;
+        case '5':
+            set_coordinates(0,1,0,0,1,0,0);
+            break;
+        case '6':
+            set_coordinates(0,1,0,0,0,0,0);
+            break;
+        case '7':
+            set_coordinates(0,0,0,1,1,1,1);
+            break;
+        case '8':
+            set_coordinates(0,0,0,0,0,0,0);
+            break;
+        case '9':
+            set_coordinates(0,0,0,0,1,0,0);
+            break;
     }
     return 1;
 }
 
+/*
+ *  Function: device_file_read
+ *  ---------------------------
+ *  Sets assigned pins of 7-segment display with provided argument taken from user_buffer.
+ *  returns: count or -EFAULT if recognizing of number fails
+ */
 static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,size_t count, loff_t *possition){
     char output_message[35] =  {"Following number is displayed: "};
     ssize_t output_message_size;
@@ -95,18 +131,13 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
     }else{
         return -EFAULT;
     }
-    
     output_message_size = sizeof(output_message);
-    
     if( *possition >= output_message_size  )
         return 0;
-    
     if( *possition + count > output_message_size  )
         count = output_message_size  - *possition;
-    
     if(copy_to_user(user_buffer, output_message+ *possition, count) != 0 )
         return -EFAULT;
-    
     *possition += count;
     return count;
 }
@@ -122,6 +153,12 @@ static int device_file_major_number = 0;
 
 static const char device_name[] = "Andrej-driver";
 
+/*
+ *  Function: pix_gpio_init
+ *  ---------------------------
+ *  Initialize gpio pins  and sets direction of them.
+ *  returns: void
+ */
 void pix_gpio_init(void) {
     printk(KERN_INFO"Andrej-driver: Initializing the gpio.");
     
@@ -144,6 +181,12 @@ void pix_gpio_init(void) {
     printk(KERN_INFO"Andrej-driver: Initialization of the gpio is done.");
 }
 
+/*
+ *  Function: pix_gpio_exit
+ *  ---------------------------
+ *  Releases previously initialized ports by pix_gpio_init.
+ *  returns: void
+ */
 void pix_gpio_exit(void) {
     printk(KERN_INFO"Andrej-driver: stopping gpio...");
     gpio_free(16);
