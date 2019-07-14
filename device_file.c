@@ -42,6 +42,7 @@ static inline void set_coordinates(int a, int b, int c, int d,int e, int f, int 
  */
 static ssize_t device_file_write(struct file *filp, const char *user_buffer, size_t count, loff_t *pos) {
     char c;
+    printk(KERN_NOTICE"Andrej-driver: Driver has been asked to write.");
     if (copy_from_user(&c, user_buffer, sizeof(char))) {
         return -EFAULT;
     }
@@ -97,7 +98,7 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
     int f = gpio_get_value(21);
     int g = gpio_get_value(22);
     
-    printk(KERN_NOTICE"Andrej-driver: Device file is read at offset = %i, read bytes count = %u", (int)*possition,(unsigned int)count );
+    printk(KERN_NOTICE"Andrej-driver: Driver has been asked to read.");
     
     if (a==0 && b==0 && c==0 && d==0 && e==0 && f==0 && g ==1){
         strcat(output_message,"0\n\0");
@@ -188,7 +189,7 @@ void pix_gpio_init(void) {
  *  returns: void
  */
 void pix_gpio_exit(void) {
-    printk(KERN_INFO"Andrej-driver: stopping gpio...");
+    printk(KERN_INFO"Andrej-driver: Releasing gpio pins.");
     gpio_free(16);
     gpio_free(17);
     gpio_free(18);
@@ -196,19 +197,19 @@ void pix_gpio_exit(void) {
     gpio_free(20);
     gpio_free(21);
     gpio_free(22);
-    printk(KERN_INFO"Andrej-driver: stopping gpio done.");
+    printk(KERN_INFO"Andrej-driver: Gpio pins released.");
 }
 
 int register_device(void) {
     int result;
     pix_gpio_init();
     printk(KERN_NOTICE
-           "Andrej-driver: register_device() is called." );
+           "Andrej-driver: Driver has been registered." );
     
     result = register_chrdev(0, device_name, &simple_driver_fops);
     if (result < 0) {
         printk(KERN_WARNING
-               "Andrej-driver:  can\'t register character device with errorcode = %i", result );
+            "Andrej-driver:  can\'t register character device with errorcode = %i", result );
         return result;
     }
     
@@ -223,7 +224,7 @@ int register_device(void) {
 void unregister_device(void) {
     pix_gpio_exit();
     printk(KERN_NOTICE
-           "Andrej-driver: unregister_device() is called" );
+           "Andrej-driver: Driver has been unregistered." );
     if (device_file_major_number != 0) {
         unregister_chrdev(device_file_major_number, device_name);
     }

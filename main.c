@@ -10,7 +10,7 @@ MODULE_AUTHOR("Andrej Pistek, Saxion 450966");
 static int simple_driver_init(void)
 {
       int result = 0;
-    printk( KERN_NOTICE "Simple-driver: Initialization started" );
+    printk( KERN_NOTICE "Andrej-driver: Initialization started" );
 
       result = register_device();
     return result;
@@ -18,7 +18,7 @@ static int simple_driver_init(void)
 /*-----------------------------------------------------------------------------------------------*/
 static void simple_driver_exit(void)
 {
-   printk( KERN_NOTICE "Simple-driver: Exiting" );
+   printk( KERN_NOTICE "Andrej-driver: Exiting" );
     unregister_device();
 }
 /*===============================================================================================*/
