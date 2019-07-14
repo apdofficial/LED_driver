@@ -1,4 +1,4 @@
-TARGET_MODULE:=simple-module
+TARGET_MODULE:=Andrej-module
 
 # If we running by kernel building system
 ifneq ($(KERNELRELEASE),)
@@ -13,17 +13,24 @@ else
 
 all : 
 # run kernel build system to make module
-	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) modules
+	$(MAKE) -C /usr/src/linux-headers-4.19.50-v7+/  M=$(PWD) modules
 
 clean:
 # run kernel build system to cleanup in current directory
-	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) clean
+	$(MAKE) -C /usr/src/linux-headers-4.19.50-v7+/  M=$(PWD) clean
 
 load:
-	insmod ./$(TARGET_MODULE).ko
+# inserting module to the system
+	sudo insmod ./$(TARGET_MODULE).ko
 
 unload:
-	rmmod ./$(TARGET_MODULE).ko
+# removing module from the system
+	sudo rmmod ./$(TARGET_MODULE).ko
+mknod(number): 
+	sudo mknod /dev/Andrej-driver c number 0
+	sudo chmod 666 /dev/Andrej-driver
+
 
 endif
+
 

@@ -1,19 +1,24 @@
-
 #include "device_file.h"
-#include <linux/fs.h>         /* file stuff */
-#include <linux/kernel.h>    /* printk() */
-#include <linux/errno.h>     /* error codes */
-#include <linux/module.h>  /* THIS_MODULE */
-#include <linux/cdev.h>      /* char device stuff */
-#include <linux/uaccess.h>  /* copy_to_user() */
+#include <linux/fs.h>           /* file stuff */
+#include <linux/kernel.h>       /* printk() */
+#include <linux/errno.h>        /* error codes */
+#include <linux/module.h>       /* THIS_MODULE */
+#include <linux/cdev.h>         /* char device stuff */
+#include <linux/uaccess.h>      /* copy_to_user() */
 #include <linux/device.h>
 #include <asm/delay.h>
 #include <linux/io.h>
 #include <linux/gpio.h>
 
-#define time_count 1000
-
-
+static inline void set_coordinates(int a, int b, int c, int d,int e, int f, int g){
+    gpio_set_value(16, a);
+    gpio_set_value(17, b);
+    gpio_set_value(18, c);
+    gpio_set_value(19, d);
+    gpio_set_value(20, e);
+    gpio_set_value(21, f);
+    gpio_set_value(22, g);
+}
 
 /*===============================================================================================*/
 static ssize_t device_file_write(struct file *filp, const char *user_buffer, size_t count, loff_t *pos) {
@@ -22,94 +27,32 @@ static ssize_t device_file_write(struct file *filp, const char *user_buffer, siz
         return -EFAULT;
     }
     if (c == '0') {
-        gpio_set_value(16, 0);
-        gpio_set_value(17, 0);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 0);
-        gpio_set_value(20, 0);
-        gpio_set_value(21, 0);
-        gpio_set_value(22, 1);
+        set_coordinates(0,0,0,0,0,0,1);
     } else if (c == '1') {
-        gpio_set_value(16, 1);
-        gpio_set_value(17, 0);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 1);
-        gpio_set_value(20, 1);
-        gpio_set_value(21, 1);
-        gpio_set_value(22, 1);
+        set_coordinates(1,0,0,1,1,1,1);
     } else if (c == '2') {
-        gpio_set_value(16, 0);
-        gpio_set_value(17, 0);
-        gpio_set_value(18, 1);
-        gpio_set_value(19, 0);
-        gpio_set_value(20, 0);
-        gpio_set_value(21, 1);
-        gpio_set_value(22, 0);
+        set_coordinates(0,0,1,0,0,1,0);
     } else if (c == '3') {
-        gpio_set_value(16, 0);
-        gpio_set_value(17, 0);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 0);
-        gpio_set_value(20, 1);
-        gpio_set_value(21, 1);
-        gpio_set_value(22, 0);
+        set_coordinates(0,0,0,0,1,1,0);
     } else if (c == '4') {
-        gpio_set_value(16, 1);
-        gpio_set_value(17, 0);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 1);
-        gpio_set_value(20, 1);
-        gpio_set_value(21, 0);
-        gpio_set_value(22, 0);
+        set_coordinates(1,0,0,1,1,0,0);
     } else if (c == '5') {
-        gpio_set_value(16, 0);
-        gpio_set_value(17, 1);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 0);
-        gpio_set_value(20, 1);
-        gpio_set_value(21, 0);
-        gpio_set_value(22, 0);
+        set_coordinates(0,1,0,0,1,0,0);
     } else if (c == '6') {
-        gpio_set_value(16, 0);
-        gpio_set_value(17, 1);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 0);
-        gpio_set_value(20, 0);
-        gpio_set_value(21, 0);
-        gpio_set_value(22, 0);
+        set_coordinates(0,1,0,0,0,0,0);
     } else if (c == '7') {
-        gpio_set_value(16, 0);
-        gpio_set_value(17, 0);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 1);
-        gpio_set_value(20, 1);
-        gpio_set_value(21, 1);
-        gpio_set_value(22, 1);
+        set_coordinates(0,0,0,1,1,1,1);
     } else if (c == '8') {
-        gpio_set_value(16, 0);
-        gpio_set_value(17, 0);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 0);
-        gpio_set_value(20, 0);
-        gpio_set_value(21, 0);
-        gpio_set_value(22, 0);
+        set_coordinates(0,0,0,0,0,0,0);
     } else if (c == '9') {
-        gpio_set_value(16, 0);
-        gpio_set_value(17, 0);
-        gpio_set_value(18, 0);
-        gpio_set_value(19, 0);
-        gpio_set_value(20, 1);
-        gpio_set_value(21, 0);
-        gpio_set_value(22, 0);
+        set_coordinates(0,0,0,0,1,0,0);
     }
     return 1;
 }
 
 static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,size_t count, loff_t *possition){
-    printk(KERN_NOTICE"Andrej-driver: Device file is read at offset = %i, read bytes count = %u", (int)*possition,(unsigned int)count );
-    
-    char output_message[35];
-    
+    char output_message[35] =  {"Following number is displayed: "};
+    ssize_t output_message_size;
     int a = gpio_get_value(16);
     int b = gpio_get_value(17);
     int c = gpio_get_value(18);
@@ -118,62 +61,42 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
     int f = gpio_get_value(21);
     int g = gpio_get_value(22);
     
+    printk(KERN_NOTICE"Andrej-driver: Device file is read at offset = %i, read bytes count = %u", (int)*possition,(unsigned int)count );
+    
     if (a==0 && b==0 && c==0 && d==0 && e==0 && f==0 && g ==1){
-        char g[35]= "0 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"0\n\0");
     }
     else if(a==1 && b==0 && c==0 && d==1 && e==1 && f==1 && g ==1){
-        char g[35] = "1 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"1\n\0");
     }
     else if(a==0 && b==0 && c==1 && d==0 && e==0 && f==1 && g ==0){
-        char g[35] = "2 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"2\n\0");
     }
     else if(a==0 && b==0 && c==0 && d==0 && e==1 && f==1 && g ==0){
-        char g[35] = "3 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"3\n\0");
     }
     else if(a==1 && b==0 && c==0 && d==1 && e==1 && f==0 && g ==0){
-        char g[35] = "4 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"4\n\0");
     }
     else if(a==0 && b==1 && c==0 && d==0 && e==1 && f==0 && g ==0){
-        char g[35] = "5 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"5\n\0");
     }
     else if(a==0 && b==1 && c==0 && d==0 && e==0 && f==0 && g ==0){
-        char g[35] = "6 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"6\n\0");
     }
     else if(a==0 && b==0 && c==0 && d==1 && e==1 && f==1 && g ==1){
-        char g[35] = "7 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"7\n\0");
     }
     else if(a==0 && b==0 && c==0 && d==0 && e==0 && f==0 && g ==0){
-        char g[35] = "8 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"8\n\0");
     }
     else if(a==0 && b==0 && c==0 && d==0 && e==1 && f==0 && g ==0){
-        char g[35] = "9 has been displayed!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        strcat(output_message,"9\n\0");
     }else{
-        char g[35] = "Something went terribly wrong!\n\0";
-        size_t destination_size = sizeof (g);
-        strncpy(output_message, g, destination_size);
+        return -EFAULT;
     }
     
-    const ssize_t output_message_size = sizeof(output_message);
+    output_message_size = sizeof(output_message);
     
     if( *possition >= output_message_size  )
         return 0;
@@ -188,7 +111,6 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
     return count;
 }
 
-/*===============================================================================================*/
 static struct file_operations simple_driver_fops =
 {
     .owner   = THIS_MODULE,
@@ -200,7 +122,6 @@ static int device_file_major_number = 0;
 
 static const char device_name[] = "Andrej-driver";
 
-/*===============================================================================================*/
 void pix_gpio_init(void) {
     printk(KERN_INFO"Andrej-driver: Initializing the gpio.");
     
@@ -236,9 +157,8 @@ void pix_gpio_exit(void) {
 }
 
 int register_device(void) {
-    pix_gpio_init();
     int result;
-    
+    pix_gpio_init();
     printk(KERN_NOTICE
            "Andrej-driver: register_device() is called." );
     
@@ -257,7 +177,6 @@ int register_device(void) {
     return 0;
 }
 
-/*-----------------------------------------------------------------------------------------------*/
 void unregister_device(void) {
     pix_gpio_exit();
     printk(KERN_NOTICE
